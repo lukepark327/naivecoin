@@ -1,10 +1,12 @@
 import {ec} from 'elliptic';
-import {existsSync, readFileSync, unlinkSync, writeFileSync} from 'fs';
+import {existsSync, readFileSync, unlinkSync, writeFileSync, mkdirSync} from 'fs';
 import * as _ from 'lodash';
 import {getPublicKey, getTransactionId, signTxIn, Transaction, TxIn, TxOut, UnspentTxOut} from './transaction';
 
+const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
+
 const EC = new ec('secp256k1');
-const privateKeyLocation = process.env.PRIVATE_KEY || 'node/wallet/private_key';
+const privateKeyLocation = process.env.PRIVATE_KEY || ('node/wallet/' + httpPort.toString() + '/private_key');
 
 const getPrivateFromWallet = (): string => {
     const buffer = readFileSync(privateKeyLocation, 'utf8');
@@ -30,6 +32,8 @@ const initWallet = () => {
     }
     const newPrivateKey = generatePrivateKey();
 
+    mkdirSync('node/wallet/' + httpPort.toString());
+    
     writeFileSync(privateKeyLocation, newPrivateKey);
     console.log('new wallet with private key created to : %s', privateKeyLocation);
 };
